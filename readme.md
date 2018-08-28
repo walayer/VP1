@@ -1,0 +1,1 @@
+Доступ к админке: burger/admin.php
