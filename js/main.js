@@ -7,7 +7,7 @@ $('#order-form').on('submit', function (evt) {
         url: 'order.php',
         data: serialize,
         success: function(data){
-            // console.log(data);
+            console.log(data);
             if(data == 'Registration'){
                 alert('Вы успешно зарегистрировались и сделали заказ!')
             } else if (data == 'Authorization') {

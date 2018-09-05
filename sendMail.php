@@ -6,17 +6,15 @@
  * Time: 22:36
  */
 
-function sendMail($email, $idOrder, $address, $count) {
-    $subject = 'заказ №'.$idOrder;
+function sendMail($email, $id_order, $address, $count) {
+    $subject = 'заказ №'.$id_order;
     if ($count == 1) {
-        $messageCount = 'Спасибо - это ваш первый заказ';
+        $message_count = 'Спасибо - это ваш первый заказ';
     } else {
-        $messageCount = 'Спасибо! Это уже '.$count.' заказ';
+        $message_count = 'Спасибо! Это уже '.$count.' заказ';
     }
     $message = "Ваш заказ будет доставлен по адресу: ".$address."\n
 Содержимое заказа: DarkBeefBurger за 500 рублей, 1 шт\n
-".$messageCount;
+".$message_count;
     mail($email, $subject, $message);
 }
-
-?>

@@ -18,23 +18,29 @@ if (!empty($post['email'])) {
 
     try {
         //получаем данные
-        $current_email = $pdo->prepare('SELECT id FROM users WHERE email = :email');
-        $current_email->execute(array('email' => $post['email']));
+        $query = $pdo->prepare('SELECT id FROM users WHERE email = :email');
+        $query->execute(array('email' => $post['email']));
 
-        $result = $current_email->fetchAll(PDO::FETCH_OBJ);
+        $result = $query->fetchAll(PDO::FETCH_OBJ);
         foreach($result as $user) {
-            $current_user = $user->id;
+            $current_user_id = $user->id;
         }
 
-        if ($post['payment'] == 'on') {
-            $payment = 1;
+        if ($post['payment'] == 'card') {
+            $payment_card = 1;
+            $cashback = 0;
+        } else if ($post['payment'] == 'cashback') {
+            $payment_card = 0;
+            $cashback = 1;
         } else {
-            $payment = 0;
+            $payment_card = 0;
+            $cashback = 0;
         }
-        if ($post['payment'] == 'on') {
-            $callback = 1;
+
+        if ($post['callback'] == 'on') {
+            $no_callback = 1;
         } else {
-            $callback = 0;
+            $no_callback = 0;
         }
 
 
@@ -46,23 +52,25 @@ if (!empty($post['email'])) {
             $data->bindParam(':email', $post['email']);
             $data->execute();
 
-            $current_email = $pdo->prepare('SELECT * FROM users WHERE email = :email');
-            $current_email->execute(array('email' => $post['email']));
-            $result = $current_email->fetchAll(PDO::FETCH_OBJ);
+            $query = $pdo->prepare('SELECT * FROM users WHERE email = :email');
+            $query->execute(array('email' => $post['email']));
+            $result = $query->fetchAll(PDO::FETCH_OBJ);
             foreach($result as $user) {
-                $current_user = $user->id;
+                $current_user_id = $user->id;
             }
 
-            $data = $pdo->prepare('INSERT INTO orders(user_id, short_change, payment_by_card, call_back, comment) VALUES(:user_id, :short_change, :payment_by_card, :call_back, :comment)');
-            $data->bindParam(':user_id', $current_user);
-            $data->bindParam(':short_change', $payment);
-            $data->bindParam(':payment_by_card', $payment);
-            $data->bindParam(':call_back', $callback);
+            $data = $pdo->prepare('INSERT INTO orders(user_id, short_change, payment_by_card, call_back, address, comment) VALUES(:user_id, :cashback, :payment_card, :no_callback, :address, :comment)');
+            $data->bindParam(':user_id', $current_user_id);
+            $data->bindParam(':cashback', $cashback);
+            $data->bindParam(':payment_card', $payment_card);
+            $data->bindParam(':no_callback', $no_callback);
             $data->bindParam(':comment', $post['comment']);
+            $address = 'Улица: '.$post['street'].', Дом: '.$post['home'].', Корпус: '.$post['part'].', Квартира: '.$post['appt'].', Этаж: '.$post['floor'];
+            $data->bindParam(':address', $address);
             $data->execute();
 
             $current_order = $pdo->prepare('SELECT * FROM orders WHERE user_id = :user_id');
-            $current_order->execute(array('user_id' => $current_user));
+            $current_order->execute(array('user_id' => $current_user_id));
             $result = $current_order->fetchAll(PDO::FETCH_OBJ);
             foreach($result as $order) {
                 $current_ord = $order->id;
@@ -73,28 +81,30 @@ if (!empty($post['email'])) {
 
         } else {
 
-            $data = $pdo->prepare('INSERT INTO orders(user_id, short_change, payment_by_card, call_back, comment) VALUES(:user_id, :short_change, :payment_by_card, :call_back, :comment)');
-            $data->bindParam(':user_id', $current_user);
-            $data->bindParam(':short_change', $payment);
-            $data->bindParam(':payment_by_card', $payment);
-            $data->bindParam(':call_back', $callback);
+            $data = $pdo->prepare('INSERT INTO orders(user_id, short_change, payment_by_card, call_back, address, comment) VALUES(:user_id, :cashback, :payment_card, :no_callback, :address, :comment)');
+            $data->bindParam(':user_id', $current_user_id);
+            $data->bindParam(':cashback', $cashback);
+            $data->bindParam(':payment_card', $payment_card);
+            $data->bindParam(':no_callback', $no_callback);
             $data->bindParam(':comment', $post['comment']);
+            $address = 'Улица: '.$post['street'].', Дом: '.$post['home'].', Корпус: '.$post['part'].', Квартира: '.$post['appt'].', Этаж: '.$post['floor'];
+            $data->bindParam(':address', $address);
             $data->execute();
 
-            $current_order1 = $pdo->prepare('SELECT * FROM orders WHERE user_id = :user_id ORDER BY id DESC LIMIT 1');
-            $current_order1->execute(array('user_id' => $current_user));
-            $result1 = $current_order1->fetchAll(PDO::FETCH_OBJ);
-            foreach($result1 as $order) {
-                $current_ord1 = $order->id;
+            $current_order = $pdo->prepare('SELECT * FROM orders WHERE user_id = :user_id ORDER BY id DESC LIMIT 1');
+            $current_order->execute(array('user_id' => $current_user_id));
+            $result = $current_order->fetchAll(PDO::FETCH_OBJ);
+            foreach($result as $order) {
+                $current_order_id = $order->id;
             }
-            $current_order2 = $pdo->prepare('SELECT COUNT(id) as cid FROM orders WHERE user_id = :user_id');
-            $current_order2->execute(array('user_id' => $current_user));
-            $result2 = $current_order2->fetchAll(PDO::FETCH_OBJ);
-            foreach($result2 as $order) {
-                $current_ord2 = $order->cid;
+            $number_user_orders = $pdo->prepare('SELECT COUNT(id) as cid FROM orders WHERE user_id = :user_id');
+            $number_user_orders->execute(array('user_id' => $current_user_id));
+            $result_number_user_orders = $number_user_orders->fetchAll(PDO::FETCH_OBJ);
+            foreach($result_number_user_orders as $order) {
+                $number_orders = $order->cid;
             }
-            $address = 'Улица: '.$post['street'].', Дом: '.$post['home'].', Корпус: '.$post['part'].', Квартира: '.$post['appt'].', Этаж: '.$post['floor'];
-            sendMail($post['email'], $current_ord1, $address, $current_ord2);
+
+            sendMail($post['email'], $current_order_id, $address, $number_orders);
 
             return print 'Authorization';
         }
@@ -106,5 +116,3 @@ if (!empty($post['email'])) {
 } else {
         return print 'NO email';
 }
-
-?>

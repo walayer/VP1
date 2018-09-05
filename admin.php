@@ -1,4 +1,3 @@
-<pre>
 <?php
 /**
  * Created by PhpStorm.
@@ -7,12 +6,14 @@
  * Time: 22:31
  */
 
+echo '<pre>';
+
 $dsn = "mysql:host=localhost;dbname=burger;charset=utf8";
 $pdo = new PDO($dsn, 'root');
-$prepare = $pdo->prepare('SELECT * FROM users where id > :uslovie1');
+$prepare = $pdo->prepare('SELECT * FROM users where id > :user_id');
 
 $id = 0;
-$prepare->execute(['uslovie1' => $id]);
+$prepare->execute(['user_id' => $id]);
 $data = $prepare ->fetchAll(PDO::FETCH_OBJ);
 echo 'Список всех пользователей:'.PHP_EOL;
 echo PHP_EOL;
@@ -38,23 +39,23 @@ echo '<tr align="center">';
     echo '</td>';
 echo '</tr>';
 
-foreach($data as $users) {
+foreach($data as $user) {
 
     echo '<tr align="left">';
         echo '<td>';
             echo $number;
         echo '</td>';
         echo '<td>';
-            echo $users->id;
+            echo $user->id;
         echo '</td>';
         echo '<td>';
-            echo $users->email;
+            echo $user->email;
         echo '</td>';
         echo '<td>';
-            echo $users->name;
+            echo $user->name;
         echo '</td>';
         echo '<td>';
-            echo $users->phone;
+            echo $user->phone;
         echo '</td>';
     echo '</tr>';
     $number++;
@@ -67,10 +68,10 @@ echo PHP_EOL;
 echo 'Список всех заказов:'.PHP_EOL;
 echo PHP_EOL;
 
-$prepare = $pdo->prepare('SELECT * FROM orders where id > :uslovie1');
+$prepare = $pdo->prepare('SELECT * FROM orders where id > :order_id');
 
 $id = 0;
-$prepare->execute(['uslovie1' => $id]);
+$prepare->execute(['order_id' => $id]);
 $data = $prepare ->fetchAll(PDO::FETCH_OBJ);
 $number = 1;
 
@@ -93,47 +94,53 @@ echo '<tr align="center">';
         echo 'Оплата картой';
     echo '</td>';
     echo '<td>';
-        echo 'Перезвонить';
+        echo 'Не перезванивать';
+    echo '</td>';
+    echo '<td>';
+        echo 'Адрес';
     echo '</td>';
     echo '<td>';
         echo 'Комментарий';
     echo '</td>';
 echo '</tr>';
 
-foreach($data as $orders) {
+foreach($data as $order) {
     echo '<tr align="left">';
         echo '<td>';
             echo $number;
         echo '</td>';
         echo '<td>';
-            echo $orders->id;
+            echo $order->id;
         echo '</td>';
         echo '<td>';
-            echo $orders->user_id;
+            echo $order->user_id;
         echo '</td>';
         echo '<td>';
-            if($orders->short_change == 1) {
+            if($order->short_change == 1) {
                 echo 'Да';
             } else {
                 echo 'Нет';
             }
         echo '</td>';
         echo '<td>';
-            if($orders->payment_by_card == 1) {
+            if($order->payment_by_card == 1) {
                 echo 'Да';
             } else {
                 echo 'Нет';
             }
         echo '</td>';
         echo '<td>';
-            if($orders->call_back == 1) {
+            if($order->call_back == 1) {
                 echo 'Да';
             } else {
                 echo 'Нет';
             }
         echo '</td>';
         echo '<td>';
-            echo $orders->comment;
+            echo $order->address;
+        echo '</td>';
+        echo '<td>';
+            echo $order->comment;
         echo '</td>';
         echo '</tr>';
     $number++;
@@ -142,5 +149,4 @@ foreach($data as $orders) {
 
 echo '</table>';
 
-?>
-</pre>
+echo '</pre>';
